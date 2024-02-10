@@ -149,8 +149,8 @@ def train(model, train, val, epochs):
         print(
             'epoch: ', epoch,
             'train_loss: ',  avg_train_loss,
-            'valid loss: ', avg_eval_acc,
-            'valid accyr ', avg_loss_Eval,
+            'valid accur ', avg_eval_acc,
+            'valid loss ', avg_loss_Eval,
         )
 
     
