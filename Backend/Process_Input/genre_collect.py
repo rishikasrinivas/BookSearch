@@ -14,7 +14,7 @@ def getTopKGenres(model, txt, k):
     model_m = model.getModel()
 
     token= model.get_tokenizer()
-    path = '/Users/rishikasrinivas/Documents/Rishika/UCSC/Projects/BERt/Backend/model_weights.pth'
+    #path = '/Users/rishikasrinivas/Documents/Rishika/UCSC/Projects/BERt/Backend/model_weights.pth'
     model_m.load_state_dict(torch.load(path,map_location=torch.device('cpu')))
 
     tokens=token(txt, return_tensors='pt')
