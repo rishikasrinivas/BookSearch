@@ -5,20 +5,23 @@ from Backend.CompareResults.sentence_sim import get_similarity
 
 def main(userInput):
     model = RobertaBase()
-    genres = getTopKGenres(model, userInput, 1)
+    genres = getTopKGenres(model, userInput, 4)
+    print(genres)
+    return 0
     summs = callAPI(genres)
     
     #compare user search to narrowed down results
+    print("pt1")
     summ=[]
     for val in summs.keys():
         summ.append(val)
     similarities =get_similarity(userInput, summ)
-    
+    print("pt2")
     #process inputs with similarity scores
     for (desc, score) in similarities:
         if len(desc.split()) < 10:
             similarities.remove((desc,score))
-
+    print("pt3")
     titles = {}
     for summary in similarities[:5]:
         title= summs[summary[0]]
@@ -34,4 +37,4 @@ def printTitles(titles):
         i+=1
 
 
-main("2 siblings go on an adventure")
+main("how to ride a bike")

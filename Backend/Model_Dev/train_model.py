@@ -1,30 +1,23 @@
-from transformers import RobertaConfig
-from transformers import AdamW, BertConfig
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer, BertForSequenceClassification, BertTokenizer
 import torch
-import numpy as np
-from process_data import getDF, get_labels
+from process_data import getDF
 from torch.utils.data import TensorDataset, random_split
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from transformers import TrainingArguments, Trainer
 from datasets import load_metric
 from transformers import DataCollatorForTokenClassification
 from transformers import get_linear_schedule_with_warmup
 
-# Initializing a RoBERTa configuration
-configuration = RobertaConfig()
+NUM_CLASSES = 14
+device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-configuration.num_labels = 10
-tokenizer = AutoTokenizer.from_pretrained("roberta-base", max_length = 512)
+# Load pre-trained model and tokenizer
+model = BertForSequenceClassification.from_pretrained("bert-base-uncased").to(device)
+tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
 
+# Modify the output layer to match the number of classes
+model.classifier = torch.nn.Linear(in_features = 768, out_features= NUM_CLASSES)
+print(model)
 data_collator = DataCollatorForTokenClassification(tokenizer)
-model = AutoModelForSequenceClassification.from_pretrained(
-    "roberta-base", # Use the 12-layer BERT model, with an uncased vocab.
-    num_labels = 10, # The number of output labels--2 for binary classification.
-                    # You can increase this for multi-class tasks.   
-    #output_attentions = False, # Whether the model returns attentions weights.
-    #output_hidden_states = False, # Whether the model returns all hidden-states.
-)
 
 def get_input_id_and_attention_masks():
     df = getDF() #from process.py
@@ -35,7 +28,7 @@ def get_input_id_and_attention_masks():
         encoded_dict = tokenizer.encode_plus(
                             summ,                      # Sentence to encode.
                             add_special_tokens = True, # Add '[CLS]' and '[SEP]'
-                            max_length = 500,           # Pad & truncate all sentences.
+                            max_length = 512,           # Pad & truncate all sentences.
                             truncation=True,
                             pad_to_max_length = True,
                             padding='max_length',
@@ -82,83 +75,98 @@ def createDataloaders(train_dataset, val_dataset):
     return train_dataloader, valid_dataloader
 
 
+def calc_accuracy(logits,labels):
+    label=[]
+    num_ones = 0
+    acc = 0
+    for label_set in labels:
+        labs = []
+        for ind, res in enumerate(label_set):
+            if res.item() == 1:
+                labs.append(ind)
+        label.append(labs)
+        num_ones += len(labs)
+
+    for i,log in enumerate(logits):
+        top_out = (-log).argsort()[:5]
+    
+        for ind in top_out:
+            if ind in label[i]:
+                acc = acc+1
+    return acc/num_ones
 
 def train(model, train, val, epochs):
     total_steps = len(train)*epochs
-    optimizer = AdamW(model.parameters(),
+    optimizer = torch.optim.Adam(model.parameters(),
                   lr = 2e-5, # args.learning_rate - default is 5e-5, our notebook had 2e-5
                   eps = 1e-8 # args.adam_epsilon  - default is 1e-8.
                 )
-    scheduler = get_linear_schedule_with_warmup(optimizer, 
-                                            num_warmup_steps = 0, 
+    scheduler = get_linear_schedule_with_warmup(optimizer,
+                                            num_warmup_steps = 0,
                                             num_training_steps = total_steps)
-    total_train_loss = 0
-    batch_loss = 0
-    for epoch in range(epochs):
+    loss_fn=torch.nn.BCEWithLogitsLoss()
+    for epoch in range(3):
+        total_train_loss = 0
+        batch_loss = 0
         print("")
         print('======== Epoch {:} / {:} ========'.format(epoch + 1, epochs))
         print('Training...')
         model.train()
         for step, batch in enumerate(train):
-            print("train step: ", step)
-            input_ids=  batch[0]
-            input_mask = batch[1]
-            labels = batch[2]
-            print(labels)
-            out = model(input_ids, attention_mask=input_mask, labels= labels)
-            
-            loss = out['loss']
+            input_ids=  batch[0].to(device)
+            input_mask = batch[1].to(device)
+            labels = batch[2].to(device)
+
+            optimizer.zero_grad()
+            out = model(input_ids, attention_mask=input_mask)
+
             logits =out['logits']
-            
+            loss = loss_fn(logits, labels)
+        
+            acc += calc_accuracy(logits, labels)
             total_train_loss += loss.item()
             batch_loss += loss.item()
-            
+
             loss.backward()
-            
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
-        avg_train_loss = total_train_loss/len(train)
-    
+            scheduler.step()
    
-        print("")
+        avg_train_loss = total_train_loss/len(train)
+        print('train_loss: ',  avg_train_loss,)
+        print('train_acc: ', acc)
         print("Running Validation...")
         model.eval()
         total_eval_accuracy=0
         total_eval_loss= 0
         num_Eval_steps= 0
-        
-        for batch in val:
-            input_ids= batch[0]
-            input_mask=batch[1]
-            labels = batch[2]
-            
-            with torch.no_grad():
-                out = model(input_ids,attention_mask=input_mask,labels = labels)
-                
-                
-            loss = out['loss']
-            logits = out['logits']
-            
-            total_eval_loss += loss.item()
-            
-            logits = logits.detach().numpy()
-            label_ids = labels.numpy()
 
-            total_eval_accuracy += flat_accuracy(logits, label_ids)
-        avg_eval_acc = total_eval_accuracy/len(val) 
+        for batch in val:
+            input_ids= batch[0].to(device)
+            input_mask=batch[1].to(device)
+            labels = batch[2].to(device)
+            print(input_ids.shape, labels.shape )
+            with torch.no_grad():
+                out = model(input_ids,attention_mask=input_mask)
+
+
+
+            logits = out['logits']
+            loss = loss_fn(logits, labels)
+            total_eval_loss += loss.item()
+
+            logits = logits.detach().cpu().numpy()
+            label_ids = labels.cpu().numpy()
+
+            #total_eval_accuracy +=
+        #avg_eval_acc = total_eval_accuracy/len(val)
         avg_loss_Eval = total_eval_loss/len(val)
         print(
             'epoch: ', epoch,
             'train_loss: ',  avg_train_loss,
-            'valid accur ', avg_eval_acc,
+            #'valid accur: ', avg_eval_acc,
             'valid loss ', avg_loss_Eval,
         )
-
-    
-def flat_accuracy(preds, labels):
-    pred_flat = np.argmax(preds, axis=1).flatten()
-    labels_flat = labels.flatten()
-    return np.sum(pred_flat == labels_flat) / len(labels_flat)   
-
 input_ids, attention_masks, labels=get_input_id_and_attention_masks() 
 ds=createTensorDS(input_ids, attention_masks, labels) 
 train_dataset, val_dataset=split(ds)

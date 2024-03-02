@@ -1,22 +1,24 @@
 import torch
 
+from transformers import BertForSequenceClassification, BertTokenizer, DataCollatorForTokenClassification
 import numpy as np
-from transformers import RobertaConfig
-from transformers import AdamW, BertConfig
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 class RobertaBase():
     def __init__(self):
-        self.model = AutoModelForSequenceClassification.from_pretrained(
-            "roberta-base", # Use the 12-layer BERT model, with an uncased vocab.
-            num_labels = 10, # The number of output labels--2 for binary classification.
-                            # You can increase this for multi-class tasks.   
-            #output_attentions = False, # Whether the model returns attentions weights.
-            #output_hidden_states = False, # Whether the model returns all hidden-states.
-        )
-        self.tokenizer = AutoTokenizer.from_pretrained("roberta-base", max_length = 512)
-        self.config = RobertaConfig()
+        self.num_classes = 14
+        self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+
+
+
+# Load pre-trained model and tokenizer
+        self.model = BertForSequenceClassification.from_pretrained("bert-base-uncased").to(self.device)
+        self.tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+
+# Modify the output layer to match the number of classes
+        self.model.classifier = torch.nn.Linear(in_features = 768, out_features= self.num_classes)
+        self.data_collator = DataCollatorForTokenClassification(self.tokenizer)
+        
     def getModel(self):
         return self.model
     
@@ -24,9 +26,6 @@ class RobertaBase():
     def get_tokenizer(self):
         return self.tokenizer
     
-  
-       
-  
     def tokenize(self, txt):
         return self.tokenizer(txt, return_tensors='pt')
     
