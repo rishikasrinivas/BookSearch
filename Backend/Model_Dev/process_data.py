@@ -32,28 +32,27 @@ def cleanGenres(df):
 
     df['Genres']= pd.Series(cleaned_genre_col)
     return df
-def writeToFile(file, genres):
+'''def writeToFile(file, genres):
     with open(file, 'w') as f:
         for i, key in enumerate(genres.keys()):
             f.write(i + ": " + key)
-    f.close()
+    f.close()'''
     
 def getMostFreqGenres(df):
-    if (os.path.isfile(DICT_PATH)):
-        return
-    freq={}
-    for genre in df['Genres']:
-        for g in genre:
-            if g not in freq.keys():
-                freq[g]=1
-            else:
-                freq[g] += 1
-    newfreq=[]
-    for key,ent in freq.items():
-        if ent > 900:
-            newfreq.append(key)
-
-    return newfreq
+  keys_to_drop = ['personal development', 'biography', 'dystopia', 'science fiction fantasy','fiction', 'memoir', 'spirituality', 'classics', 'biography memoir' , 'new adult', 'thriller', 'suspense', 'literary fiction', 'christian', 'british literature', 'paranormal', 'short stories', 'literature', 'young Adult', 'audiobook', 'novels', 'history', 'mystery thriller', 'adult' , 'chick lit', 'contemporary romance', 'contemporary', 'adult fiction', 'urban fantasy', 'middle grade', 'historical', 'american']
+  freq={}
+  for genre in df['Genres']:
+    for g in genre:
+      if g not in freq.keys():
+        freq[g]=1
+      else:
+        freq[g] += 1
+  print('old frwq', {k: v for k, v in sorted(freq.items(), key=lambda item: item[1])})
+  newfreq={}
+  for key,ent in freq.items():
+    if  ent > 600 and key.lower() not in keys_to_drop:
+      newfreq[key]=ent
+  return newfreq.keys()
 
 def store_most_frequent_genres(df, most_frequent):
   # Remove labels from entries
@@ -76,7 +75,8 @@ def one_hot(df, col_name):
     for i in range(len(df)):
         df["genre_id"][i]=one_hot_encodings[i]
     df ["genre_id"] = [list(map(float, target)) for target in df["genre_id"]] 
-    return df       
+    return df      
+
 
 def getDF():
 
@@ -95,13 +95,13 @@ def getDF():
     df = cleanDesc(df)
     most_freq_genres = getMostFreqGenres(df)
     df = store_most_frequent_genres(df, most_freq_genres)
-    df =one_hot(df, 'Genres')
+    df  =one_hot(df, 'Genres')
     return df
 
-def get_labels():
+'''def get_labels():
     data_path = "/Users/rishikasrinivas/Documents/Rishika/UCSC/Projects/BERt/train_data.csv"
     df = pd.read_csv(data_path)
 
-    return df['genre'].unique().tolist()
+    return df['genre'].unique().tolist()'''
 
 df = getDF()

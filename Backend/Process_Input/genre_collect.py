@@ -1,6 +1,6 @@
 import sys
 sys.path.append('/Users/rishikasrinivas/Documents/Rishika/UCSC/Projects/BERt/')
-from Backend.Model_Dev.model import RobertaBase
+
 from Backend.Data.constants import D, MODEL_WEIGHTS
 
 import torch

@@ -2,5 +2,6 @@
     "python.analysis.extraPaths": [
         "./model_dev",
         "./Backend/Data"
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "off"
 }

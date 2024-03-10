@@ -1,4 +1,4 @@
-file="/Users/rishikasrinivas/Documents/Rishika/UCSC/Projects/BERt/ID2Genre.txt"
+
 def loadFileIntoDict(file):
     with open(file, "r") as f:
         lines = f.readlines()

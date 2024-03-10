@@ -4,9 +4,9 @@ from transformers import BertForSequenceClassification, BertTokenizer, DataColla
 import numpy as np
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-class RobertaBase():
+class BERT():
     def __init__(self):
-        self.num_classes = 14
+        self.num_classes = 13
         self.device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 

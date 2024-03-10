@@ -2,11 +2,11 @@ from transformers import AutoTokenizer, BertForSequenceClassification, BertToken
 import torch
 from process_data import getDF
 from torch.utils.data import TensorDataset, random_split
-from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
-from datasets import load_metric
+from torch.utils.data import DataLoader, SequentialSampler
+
 from transformers import DataCollatorForTokenClassification
 from transformers import get_linear_schedule_with_warmup
-
+from sampler import BalanceSampler
 NUM_CLASSES = 14
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
@@ -63,7 +63,7 @@ def createDataloaders(train_dataset, val_dataset):
 
     train_dataloader = DataLoader(
                 train_dataset,  
-                sampler = RandomSampler(train_dataset), 
+                sampler = BalanceSampler(train_dataset), 
                 batch_size = batch_size 
             )
 
@@ -145,7 +145,6 @@ def train(model, train, val, epochs):
             input_ids= batch[0].to(device)
             input_mask=batch[1].to(device)
             labels = batch[2].to(device)
-            print(input_ids.shape, labels.shape )
             with torch.no_grad():
                 out = model(input_ids,attention_mask=input_mask)
 
@@ -158,13 +157,11 @@ def train(model, train, val, epochs):
             logits = logits.detach().cpu().numpy()
             label_ids = labels.cpu().numpy()
 
-            #total_eval_accuracy +=
-        #avg_eval_acc = total_eval_accuracy/len(val)
+            
         avg_loss_Eval = total_eval_loss/len(val)
         print(
             'epoch: ', epoch,
             'train_loss: ',  avg_train_loss,
-            #'valid accur: ', avg_eval_acc,
             'valid loss ', avg_loss_Eval,
         )
 input_ids, attention_masks, labels=get_input_id_and_attention_masks() 
