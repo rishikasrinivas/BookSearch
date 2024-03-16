@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html >
+<!--From https://codepen.io/frytyler/pen/EGdtg-->
+<head>
+ 
+
+
+  <link rel="stylesheet" type="text/css" href="static/style.css">
+
+
+  
+</head>
+
+<body>
+  <div class="container">
+    <div class="head">
+      <h1>Find My Book</h1>
+    </div>
+    <div class="desc">
+      <p>Want to find a book relevant to your specific taste. Type a brief summary of what you want and get reading!</p>
+    </div>
+    <div class="search-container">
+      <form method="POST" action="/results">
+        <input type="search" class="search-bar" name="query" placeholder="Search...">
+        <button type="submit">Search</button>
+      
+
+  
+      </form>
+    </div>
+
+    <ul>
+      {% for book in book_list %}
+            <li><strong>{{ book['title'] }}</strong>: {{ book['summary'] }}</li>
+            <p> </p>
+        {% endfor %}
+    </ul>
+
+
+    
+  </div>
+</body>
+
+</html>

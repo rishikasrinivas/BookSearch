@@ -1,4 +1,5 @@
 
+
 def loadFileIntoDict(file):
     with open(file, "r") as f:
         lines = f.readlines()

@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import MultiLabelBinarizer
 import sys
-sys.path.append('/Users/rishikasrinivas/Documents/Rishika/UCSC/Projects/BERt/')
+sys.path.append('/Users/rishikasrinivas/Documents/Rishika/UCSC/Projects/BookSearch/')
 from Backend.Data.load_data import loadFileIntoDict
 import nltk
 nltk.download('stopwords')

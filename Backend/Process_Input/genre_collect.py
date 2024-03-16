@@ -1,7 +1,7 @@
 import sys
 sys.path.append('/Users/rishikasrinivas/Documents/Rishika/UCSC/Projects/BERt/')
 
-from Backend.Data.constants import D, MODEL_WEIGHTS
+from Data.constants import D, MODEL_WEIGHTS
 
 import torch
   
@@ -18,7 +18,7 @@ def getTopKGenres(model, txt, k):
     tokens=token(txt, return_tensors='pt')
 
     res = model_m(**tokens)
-    preds = (-res['logits'].detach().cpu().numpy())[0].argsort()[:k]
+    preds = (-res['logits'].detach().cpu().numpy())[0].argsort()[:5]
     #get the highest pred and all the ones that are75-100% of the highest val
     topk = [D[index] for index in preds]
 
