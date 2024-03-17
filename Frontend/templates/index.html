@@ -30,8 +30,10 @@
     </div>
     <div class="results">
       <ul>
-        {% for book in book_list %}
+        <h2><strong>You're search was: {{q}}</strong></h2>
+        {% for book in b %}
               <li><strong>{{ book['title'] }}</strong>: {{ book['summary'] }}</li>
+              <p> </p>
               <p> </p>
           {% endfor %}
       </ul>

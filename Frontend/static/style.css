@@ -43,17 +43,17 @@ form button {
 .head {
     text-align: center;
     position: relative;
-    margin-top: -400px; /* Add some space below the header */
+     /* Add some space below the header */
 }
 
 .desc {
     text-align: center;
     position: relative;
-    margin-bottom: 100px;
+
 }
 
 .results {
     text-align: left;
     position: relative;
-    top: 100px;
+
 }

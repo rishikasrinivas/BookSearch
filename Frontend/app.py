@@ -15,8 +15,13 @@ def result():
         books = get_books(query)
     else:
         return render_template('index.html', book_list=[])
+    
+    params = {
+        "queries" : query,
+        "book_sum": books['books_'],
+    }
     if books != []:
-        return render_template('index.html', book_list=books['books_'])
+        return render_template('index.html', q=params['queries'], b=params['book_sum'])
     else:
         return render_template('index.html')
 
