@@ -17,7 +17,7 @@
 
 
 form{
-    position: absolute;
+    position: relative;
     background: #fff;
     width: 600px;
     height: 55px;
@@ -42,16 +42,18 @@ form button {
 }
 .head {
     text-align: center;
-    
+    position: relative;
     margin-top: -400px; /* Add some space below the header */
 }
 
 .desc {
     text-align: center;
+    position: relative;
     margin-bottom: 100px;
 }
 
-.book_res {
-    text-align: center;
+.results {
+    text-align: left;
+    position: relative;
     top: 100px;
 }

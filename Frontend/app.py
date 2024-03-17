@@ -11,9 +11,15 @@ def home():
 @app.route('/results', methods= ['POST'])
 def result():
     query = request.form['query']
-    books = get_books(query)
-    print(books)
-    return render_template('index.html', book_list=books['books_'])
+    if query != "":
+        books = get_books(query)
+    else:
+        return render_template('index.html', book_list=[])
+    if books != []:
+        return render_template('index.html', book_list=books['books_'])
+    else:
+        return render_template('index.html')
+
 
 
 if __name__ == "__main__":

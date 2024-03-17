@@ -11,7 +11,8 @@ def get_similarity(query, compareSents):
     query_emb = model.encode(query)
     doc_emb = model.encode(compareSents)
 
-    #Compute dot score between query and all document embeddings
+    print(compareSents)
+    #Compute dot scre between query and all document embeddings
     scores = util.dot_score(query_emb, doc_emb)[0].cpu().tolist()
 
     #Combine docs & scores

@@ -18,7 +18,7 @@ def getTopKGenres(model, txt, k):
     tokens=token(txt, return_tensors='pt')
 
     res = model_m(**tokens)
-    preds = (-res['logits'].detach().cpu().numpy())[0].argsort()[:5]
+    preds = (-res['logits'].detach().cpu().numpy())[0].argsort()[:k]
     #get the highest pred and all the ones that are75-100% of the highest val
     topk = [D[index] for index in preds]
 

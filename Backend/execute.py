@@ -2,14 +2,19 @@ from Process_Input.genre_collect import getTopKGenres
 from Model_Dev.model import BERT
 from API.api_call import callAPI
 from CompareResults.sentence_sim import get_similarity
+from transformers import pipeline
 
 def get_books(userInput):
     model = BERT()
-    genres = getTopKGenres(model, userInput, 4)
+    summarizer = pipeline("summarization", model="Falconsai/text_summarization")
+    genres = getTopKGenres(model, userInput, 3)
     print(genres)
     summs = callAPI(genres)
     
     #compare user search to narrowed down results
+    
+    
+
 
     summ=[]
     for val in summs.keys():
@@ -25,9 +30,11 @@ def get_books(userInput):
     
     for summary in similarities[:5]:
         d1={}
+
         title= summs[summary[0]]
         d1['title']=title
-        d1['summary']= summary[0]
+        d1['summary']=  summarizer(summary[0])[0]['summary_text']
+       # d1['categ'] = 
         titles["books_"].append(d1)
         
     print("These books would be of interest to you: ")

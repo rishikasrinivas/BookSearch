@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader, SequentialSampler
 from transformers import DataCollatorForTokenClassification
 from transformers import get_linear_schedule_with_warmup
 from sampler import BalanceSampler
-NUM_CLASSES = 14
+NUM_CLASSES = 13
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 # Load pre-trained model and tokenizer

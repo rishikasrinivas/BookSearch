@@ -18,11 +18,13 @@ def callAPI(genres):
         descriptions= {}
         book_summs = responses.get("items", []) 
         for book in book_summs:
+          
             volume_info = book.get('volumeInfo', [])
             title = volume_info.get('title', 'Unknown Title')
             description = volume_info.get('description', 'No description available')
 
             descriptions[description] = title
+
     else:
         print("Invalid API call")
         return

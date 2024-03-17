@@ -28,13 +28,16 @@
   
       </form>
     </div>
+    <div class="results">
+      <ul>
+        {% for book in book_list %}
+              <li><strong>{{ book['title'] }}</strong>: {{ book['summary'] }}</li>
+              <p> </p>
+          {% endfor %}
+      </ul>
+    </div>
 
-    <ul>
-      {% for book in book_list %}
-            <li><strong>{{ book['title'] }}</strong>: {{ book['summary'] }}</li>
-            <p> </p>
-        {% endfor %}
-    </ul>
+    
 
 
     
